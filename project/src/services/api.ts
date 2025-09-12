@@ -6,34 +6,36 @@ class TelemedicineAPI {
   private consultations: Consultation[] = [];
   private prescriptions: Prescription[] = [mockPrescription];
   private pharmacyOrders: PharmacyOrder[] = [mockPharmacyOrder];
+  private patients: Patient[] = [mockPatient];
 
-  // Auth
-  async login(email: string, password: string, role: 'doctor' | 'patient'): Promise<Doctor | Patient | null> {
-    await this.delay(500);
-    
+  // Auth (mocked)
+  async login(email: string, _password: string, role: 'doctor' | 'patient'): Promise<Doctor | Patient | null> {
     if (role === 'doctor') {
-      return this.doctors.find(doc => doc.email === email) || null;
-    } else {
-      return mockPatient;
+      return this.doctors.find(d => d.email === email) || null;
     }
+    return this.patients.find(p => p.email === email) || this.patients[0] || null;
   }
 
   async registerDoctor(doctorData: Partial<Doctor>): Promise<Doctor> {
-    await this.delay(500);
     const newDoctor: Doctor = {
-      id: `doc${this.doctors.length + 1}`,
+      id: `doc${Date.now()}`,
       role: 'doctor',
       slots: [],
+      rating: 4.5,
+      languages: [],
+      price: 0,
+      experience: 0,
+      specialty: '',
+      name: '',
+      email: '',
       ...doctorData
     } as Doctor;
-    
     this.doctors.push(newDoctor);
     return newDoctor;
   }
 
-  // Doctors
+  // Doctors (mocked)
   async getDoctors(): Promise<Doctor[]> {
-    await this.delay(300);
     return this.doctors;
   }
 
@@ -185,6 +187,43 @@ class TelemedicineAPI {
 
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // Patients (mocked)
+  async createPatient(patient: Partial<Patient>) {
+    const newPatient: Patient = {
+      id: `patient${Date.now()}`,
+      role: 'patient',
+      name: patient.name || 'New Patient',
+      email: patient.email || `patient${Date.now()}@example.com`,
+      age: patient.age || 0,
+      gender: patient.gender || 'other',
+      medicalHistory: patient.medicalHistory || [],
+      prescriptions: [],
+      consultations: []
+    };
+    this.patients.push(newPatient);
+    return newPatient;
+  }
+
+  async getPatients() {
+    return this.patients;
+  }
+
+  async getPatient(id: string) {
+    return this.patients.find(p => p.id === id) || null;
+  }
+
+  async updatePatient(id: string, updates: Partial<Patient>) {
+    const index = this.patients.findIndex(p => p.id === id);
+    if (index === -1) throw new Error('Not found');
+    this.patients[index] = { ...this.patients[index], ...updates } as Patient;
+    return this.patients[index];
+  }
+
+  async deletePatient(id: string) {
+    this.patients = this.patients.filter(p => p.id !== id);
+    return { success: true } as any;
   }
 }
 

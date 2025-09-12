@@ -101,7 +101,7 @@ function App() {
                 <div className="flex items-center gap-5">
                 <img src="./images/profile.png" alt="" className='w-10 h-10 rounded-lg'/>
                   <div>
-                    <h1 className="text-xl font-bold text-gray-900">TeleMedicine Pro</h1>
+                    <h1 className="text-xl font-bold text-gray-900">TeleMedicine</h1>
                     <p className="text-xs text-gray-500">Healthcare Platform</p>
                   </div>
                 </div>
