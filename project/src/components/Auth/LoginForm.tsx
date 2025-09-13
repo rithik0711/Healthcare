@@ -22,7 +22,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onRegisterDoctor,
       <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4">
-            <img src="../images/image.png" alt="" className='rounded-lg '/>
+            <img src="../images/image.png" alt="" className='rounded-lg flex'/>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">TeleMedicine</h1>
           <p className="text-gray-600">Your health, our priority</p>

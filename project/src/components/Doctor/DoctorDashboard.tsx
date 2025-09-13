@@ -44,6 +44,10 @@ export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ doctor }) => {
 
   const upcomingConsultations = consultations.filter(c => c.status === 'scheduled');
   const completedConsultations = consultations.filter(c => c.status === 'completed');
+  
+  // Safe access to doctor.slots with fallback
+  const availableSlots = doctor.slots?.filter(slot => slot.available) || [];
+  const availableSlotsCount = availableSlots.length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -53,7 +57,7 @@ export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ doctor }) => {
           <div className="flex items-center justify-between py-6">
             <div className="flex items-center">
               <img
-                src="./images/image.png"
+                src="./images/profile.png"
                 alt={doctor.name}
                 className="w-12 h-12 rounded-full object-cover"
               />
@@ -65,8 +69,7 @@ export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ doctor }) => {
             <div className="flex items-center space-x-4">
               <div className="flex items-center">
                 <Star className="w-5 h-5 text-yellow-400 mr-1" />
-                <span className="font-semmg
-                bold">{doctor.rating}</span>
+                <span className="font-semibold">{doctor.rating}</span>
               </div>
               <button
                 onClick={() => setShowAddSlot(true)}
@@ -96,7 +99,7 @@ export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ doctor }) => {
             <div className="flex items-center">
               <Calendar className="w-8 h-8 text-green-600" />
               <div className="ml-4">
-                <p className="text-2xl font-bold text-gray-900">{doctor.slots.filter(s => s.available).length}</p>
+                <p className="text-2xl font-bold text-gray-900">{availableSlotsCount}</p>
                 <p className="text-gray-600">Available Slots</p>
               </div>
             </div>
@@ -114,7 +117,7 @@ export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ doctor }) => {
             <div className="flex items-center">
               <Star className="w-8 h-8 text-yellow-500" />
               <div className="ml-4">
-                <p className="text-2xl font-bold text-gray-900">${(doctor.price * completedConsultations.length).toFixed(0)}</p>
+                <p className="text-2xl font-bold text-gray-900">${((doctor.price || 0) * completedConsultations.length).toFixed(0)}</p>
                 <p className="text-gray-600">Earnings</p>
               </div>
             </div>
@@ -182,20 +185,24 @@ export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ doctor }) => {
             <h2 className="text-xl font-semibold text-gray-900">Available Time Slots</h2>
           </div>
           <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {doctor.slots.filter(slot => slot.available).map(slot => (
-                <div
-                  key={slot.id}
-                  className="border rounded-lg p-4 text-center hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center justify-center mb-2">
-                    <Clock className="w-5 h-5 text-blue-600 mr-2" />
+            {availableSlots.length === 0 ? (
+              <p className="text-gray-500 text-center py-8">No available slots</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {availableSlots.map(slot => (
+                  <div
+                    key={slot.id}
+                    className="border rounded-lg p-4 text-center hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center justify-center mb-2">
+                      <Clock className="w-5 h-5 text-blue-600 mr-2" />
+                    </div>
+                    <p className="font-medium text-gray-900">{slot.date}</p>
+                    <p className="text-sm text-gray-600">{slot.time}</p>
                   </div>
-                  <p className="font-medium text-gray-900">{slot.date}</p>
-                  <p className="text-sm text-gray-600">{slot.time}</p>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -286,6 +293,12 @@ const PrescriptionModal: React.FC<{
     ));
   };
 
+  const removeMedicine = (index: number) => {
+    if (medicines.length > 1) {
+      setMedicines(prev => prev.filter((_, i) => i !== index));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -318,7 +331,7 @@ const PrescriptionModal: React.FC<{
           <div>
             <h4 className="text-lg font-medium mb-4">Medicines</h4>
             {medicines.map((medicine, index) => (
-              <div key={index} className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4 p-4 border rounded-lg">
+              <div key={index} className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-4 p-4 border rounded-lg">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Medicine Name</label>
                   <input
@@ -377,6 +390,17 @@ const PrescriptionModal: React.FC<{
                     onChange={(e) => updateMedicine(index, 'quantity', parseInt(e.target.value))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
+                </div>
+                <div className="flex items-end">
+                  {medicines.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeMedicine(index)}
+                      className="w-full px-3 py-2 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+                    >
+                      Remove
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

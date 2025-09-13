@@ -8,35 +8,55 @@ class TelemedicineAPI {
   private pharmacyOrders: PharmacyOrder[] = [mockPharmacyOrder];
   private patients: Patient[] = [mockPatient];
 
-  // Auth (mocked)
-  async login(email: string, _password: string, role: 'doctor' | 'patient'): Promise<Doctor | Patient | null> {
-    if (role === 'doctor') {
-      return this.doctors.find(d => d.email === email) || null;
+  private get baseUrl() {
+    return (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001';
+  }
+
+  // Auth (backend-connected)
+  async login(email: string, password: string, role: 'doctor' | 'patient'): Promise<Doctor | Patient | null> {
+    try {
+      const res = await fetch(`${this.baseUrl}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, role })
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data;
+    } catch {
+      return null;
     }
-    return this.patients.find(p => p.email === email) || this.patients[0] || null;
   }
 
-  async registerDoctor(doctorData: Partial<Doctor>): Promise<Doctor> {
-    const newDoctor: Doctor = {
-      id: `doc${Date.now()}`,
-      role: 'doctor',
-      slots: [],
-      rating: 4.5,
-      languages: [],
-      price: 0,
-      experience: 0,
-      specialty: '',
-      name: '',
-      email: '',
-      ...doctorData
-    } as Doctor;
-    this.doctors.push(newDoctor);
-    return newDoctor;
+  async registerDoctor(doctorData: Partial<Doctor> & { password?: string }): Promise<Doctor> {
+    const payload = {
+      name: doctorData.name,
+      email: doctorData.email,
+      password: (doctorData as any).password,
+      specialty: doctorData.specialty,
+      experience: doctorData.experience,
+      rating: doctorData.rating ?? 4.5,
+      price: doctorData.price,
+      languages: doctorData.languages ?? []
+    };
+    const res = await fetch(`${this.baseUrl}/api/auth/register-doctor`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Registration failed');
+    return await res.json();
   }
 
-  // Doctors (mocked)
+  // Doctors (backend-connected)
   async getDoctors(): Promise<Doctor[]> {
-    return this.doctors;
+    try {
+      const res = await fetch(`${this.baseUrl}/api/doctors`);
+      if (!res.ok) throw new Error('Failed to fetch');
+      return await res.json();
+    } catch {
+      return this.doctors;
+    }
   }
 
   async addTimeSlot(doctorId: string, date: string, time: string): Promise<void> {

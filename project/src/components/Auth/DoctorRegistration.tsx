@@ -16,6 +16,7 @@ export const DoctorRegistration: React.FC<DoctorRegistrationProps> = ({
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    password: '',
     specialty: '',
     experience: '',
     languages: [] as string[],
@@ -41,7 +42,8 @@ export const DoctorRegistration: React.FC<DoctorRegistrationProps> = ({
       ...formData,
       experience: parseInt(formData.experience),
       price: parseFloat(formData.price),
-      rating: 4.5 // Default rating for new doctors
+      rating: 4.5, // Default rating for new doctors
+      password: formData.password
     });
   };
 
@@ -99,8 +101,19 @@ export const DoctorRegistration: React.FC<DoctorRegistrationProps> = ({
                 placeholder="doctor@example.com"
               />
             </div>
-
-            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                required
+                value={formData.password}
+                onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter a strong password"
+              />
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
